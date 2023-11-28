@@ -28,7 +28,22 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     //await client.connect();
 
+    const userCollection = client.db("classManagement").collection("users");
     const applicationCollection = client.db("classManagement").collection("teacherRequest");
+    
+    //user
+    app.post('/users', async(req, res) =>{
+      const user = req.body;
+      const query = {email: user.email}
+      const existingUser = await userCollection.findOne(query)
+      if(existingUser){
+        return res.send({message: 'user Already add', insertedId: null})
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
+
+    //get teacher application
     app.get('/application', async(req, res)=>{
       const cursor = applicationCollection.find(req.body);
       const result = await cursor.toArray();
@@ -37,6 +52,13 @@ async function run() {
 
     app.post('/application', async(req, res)=>{
       const result = await applicationCollection.insertOne(req.body);
+      res.send(result);
+    })
+
+    ///delete
+    app.delete('/application/:id', async(req, res)=>{
+      const query = {_id: new Object(req.params.id)};
+      const result = await applicationCollection.deleteOne(query);
       res.send(result);
     })
     
