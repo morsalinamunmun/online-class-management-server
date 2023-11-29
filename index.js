@@ -124,19 +124,32 @@ async function run() {
     })
 
     //get teacher application
-    app.get('/application', async(req, res)=>{
+    app.get('/teacherRequest', async(req, res)=>{
       const cursor = applicationCollection.find(req.body);
       const result = await cursor.toArray();
       res.send(result);
     })
 
-    app.post('/application', verifyToken, verifyAdmin, async(req, res)=>{
+    app.post('/teacherRequest',  async(req, res)=>{
       const result = await applicationCollection.insertOne(req.body);
       res.send(result);
     })
 
+    //make teacher
+    app.patch('/teacherRequest/teacher/:id', verifyToken, verifyAdmin, async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set: {
+          role: 'teacher'
+        }
+      }
+      const result = await applicationCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
     ///delete
-    app.delete('/application/:id', verifyToken, verifyAdmin, async(req, res)=>{
+    app.delete('/teacherRequest/:id', verifyToken, verifyAdmin, async(req, res)=>{
       const query = {_id: new Object(req.params.id)};
       const result = await applicationCollection.deleteOne(query);
       res.send(result);
