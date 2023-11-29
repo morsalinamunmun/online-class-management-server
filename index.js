@@ -52,6 +52,19 @@ async function run() {
         next();
       })
     }
+
+     //admin verify
+     const verifyAdmin = async(req, res, next)=>{
+      const email = req.decoded.email;
+      const query = {email: email};
+      const user = await userCollection.findOne(query);
+      const isAdmin = user?.role === 'admin';
+      if(!isAdmin){
+        return res.status(403).send({message: 'forbidden access'})
+      }
+      next();
+    }
+
     //user
     app.get('/users', verifyToken, async(req,res)=>{
       //console.log(req.headers)
@@ -88,7 +101,7 @@ async function run() {
     })
 
     //user to admin
-    app.patch('/users/admin/:id', async(req, res)=>{
+    app.patch('/users/admin/:id',verifyToken, verifyAdmin, async(req, res)=>{
       const id = req.params.id;
       const filter = {_id: new ObjectId(id)}
       const updateDoc = {
@@ -100,8 +113,10 @@ async function run() {
       res.send(result);
     })
 
+   
+
     //user delete
-    app.delete('/users/:id', async(req, res)=>{
+    app.delete('/users/:id', verifyToken, verifyAdmin, async(req, res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
       const result = await userCollection.deleteOne(query);
@@ -115,13 +130,13 @@ async function run() {
       res.send(result);
     })
 
-    app.post('/application', async(req, res)=>{
+    app.post('/application', verifyToken, verifyAdmin, async(req, res)=>{
       const result = await applicationCollection.insertOne(req.body);
       res.send(result);
     })
 
     ///delete
-    app.delete('/application/:id', async(req, res)=>{
+    app.delete('/application/:id', verifyToken, verifyAdmin, async(req, res)=>{
       const query = {_id: new Object(req.params.id)};
       const result = await applicationCollection.deleteOne(query);
       res.send(result);
