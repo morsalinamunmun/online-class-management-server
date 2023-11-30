@@ -159,6 +159,26 @@ async function run() {
       res.send(result);
     })
 
+    //accepted class get 
+    /* app.get('/classes/item/:email', verifyToken, async(req, res)=>{
+      const email = req.params.email;
+      //const id = {_id: new ObjectId(req.params.id)}
+      if(email !== req.decoded.email){
+        return res.status(403).send({message: 'forbidden access'})
+      }
+
+      const query = {email: email};
+      console.log(query)
+      const user = await classCollection.findOne(query);
+      let accepted = false;
+      if(user){
+        console.log("User found:", user);
+        accepted = user?.role === 'accepted';
+      }
+      res.send({ accepted });
+    }) */
+
+
     //user delete
     app.delete('/users/:id', verifyToken, verifyAdmin, async(req, res)=>{
       const id = req.params.id;
