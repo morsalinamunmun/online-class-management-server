@@ -39,7 +39,7 @@ async function run() {
 
     //middlewares
     const verifyToken = (req, res, next) =>{
-      console.log("inside verify", req.headers.authorization)
+      //console.log("inside verify", req.headers.authorization)
       if(!req.headers.authorization){
         return res.status(401).send({message: 'unauthorized access'})
       }
@@ -65,6 +65,18 @@ async function run() {
       next();
     }
 
+    //teacher verify
+    // const verifyTeacher = async(req, res, next)=>{
+    //   const email = req.decoded.email;
+    //   const query ={email: email};
+    //   const user = await applicationCollection.findOne(query);
+    //   const isTeacher = user?.role === 'teacher';
+    //   if(isTeacher){
+    //     return res.status(403).send({message: 'forbidden access'})
+    //   }
+    //   next();
+    // }
+
     //user
     app.get('/users', verifyToken, async(req,res)=>{
       //console.log(req.headers)
@@ -72,7 +84,7 @@ async function run() {
       res.send(result);
     })
 
-    //admin
+    //get admin
     app.get('/users/admin/:email', verifyToken, async(req, res)=>{
       const email = req.params.email;
       if(email !== req.decoded.email){
@@ -88,7 +100,7 @@ async function run() {
       res.send({ admin });
     })
 
-    //
+    //user already
     app.post('/users', async(req, res) =>{
       const user = req.body;
       const query = {email: user.email}
@@ -146,6 +158,26 @@ async function run() {
       }
       const result = await applicationCollection.updateOne(filter, updateDoc);
       res.send(result);
+    })
+
+    //get teacher
+    app.get('/teacherRequest/teacher/:email', verifyToken, async(req, res)=>{
+      const email = req.params.email;
+      //const id = {_id: new ObjectId(req.params.id)}
+      if(email !== req.decoded.email){
+        return res.status(403).send({message: 'forbidden access'})
+      }
+
+      const query = {email: email};
+      console.log(query)
+      const user = await applicationCollection.findOne(query);
+      let teacher = false;
+      if(user){
+        console.log("User found:", user);
+        teacher = user?.role === 'teacher';
+        console.log(teacher)
+      }
+      res.send({ teacher });
     })
 
     ///delete
