@@ -143,10 +143,31 @@ async function run() {
     //add class get one
     app.get('/classes/:email', async(req, res)=>{
       const email = req.params.email;
-      const result = await classCollection.findOne({ email: email });
+      const result = await classCollection.findOne(email);
       res.send(result);
     })
 
+    /* app.get('/classes/:email', async(req, res) => {
+      let query = {};
+      if(req.query?.email){
+        query = { email : req.query.email}
+      }
+        const cursor = classCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result)
+    }) */
+
+
+    //get class
+    /* app.get('/classes', async(req, res)=>{
+      const item = req.body;
+         const result = await classCollection.find(item);
+         res.send(result);
+       })
+   
+       //add class get one
+        
+ */
     //class approved roll
     app.patch('/classes/item/:id', verifyToken, verifyAdmin, async(req, res)=>{
       const id = req.params.id;
