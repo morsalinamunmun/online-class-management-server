@@ -67,16 +67,16 @@ async function run() {
     }
 
     //teacher verify
-    // const verifyTeacher = async(req, res, next)=>{
-    //   const email = req.decoded.email;
-    //   const query ={email: email};
-    //   const user = await applicationCollection.findOne(query);
-    //   const isTeacher = user?.role === 'teacher';
-    //   if(isTeacher){
-    //     return res.status(403).send({message: 'forbidden access'})
-    //   }
-    //   next();
-    // }
+    const verifyTeacher = async(req, res, next)=>{
+      const email = req.decoded.email;
+      const query ={email: email};
+      const user = await applicationCollection.findOne(query);
+      const isTeacher = user?.role === 'teacher';
+      if(isTeacher){
+        return res.status(403).send({message: 'forbidden access'})
+      }
+      next();
+    }
 
     //user
     app.get('/users', verifyToken, async(req,res)=>{
@@ -127,8 +127,35 @@ async function run() {
     })
 
     //add class
-    app.post('/classes', async (req, res) => {
+    app.post('/classes', verifyToken, verifyTeacher, async (req, res) => {
       const result = await classCollection.insertOne(req.body);
+      res.send(result);
+    })
+
+    //get class
+    app.get('/classes', async(req, res)=>{
+      const cursor = classCollection.find(req.body);
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    //add class get one
+    app.get('/classes/:email', async(req, res)=>{
+      const email = req.params.email;
+      const result = await classCollection.findOne({ email: email });
+      res.send(result);
+    })
+
+    //class approved roll
+    app.patch('/classes/item/:id', verifyToken, verifyAdmin, async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set: {
+          role: 'accepted'
+        }
+      }
+      const result = await classCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
 
