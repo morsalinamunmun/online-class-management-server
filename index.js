@@ -29,6 +29,7 @@ async function run() {
 
     const userCollection = client.db("classManagement").collection("users");
     const applicationCollection = client.db("classManagement").collection("teacherRequest");
+    const classCollection = client.db("classManagement").collection("classes");
     
     //jwt related api
     app.post('/jwt', async(req, res)=>{
@@ -125,7 +126,11 @@ async function run() {
       res.send(result);
     })
 
-   
+    //add class
+    app.post('/classes', async (req, res) => {
+      const result = await classCollection.insertOne(req.body);
+      res.send(result);
+    })
 
     //user delete
     app.delete('/users/:id', verifyToken, verifyAdmin, async(req, res)=>{
